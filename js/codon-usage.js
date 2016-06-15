@@ -249,8 +249,8 @@ Codon_usage.prototype.setup_plot = function(parent_div){
   this.yScale = yScale;
   var parent = d3.select('#' + parent_div);
   var svg = parent.append('svg');
-  svg.attr('width', '100%')
-    .attr('height', '100%')
+  svg.attr('width', '98%')
+    .attr('height', '98%')
     .attr('viewBox', '0 0 ' + size + ' ' + size)
     .attr('preserveAspectRatio', 'xMidYMid meet')
   var codon_plot_group = svg.append('g');
