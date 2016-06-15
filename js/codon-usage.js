@@ -157,13 +157,16 @@ this.color = {
 	exp_acidic: '#e31a1c'
   };
 
-  this.base_count = stats.base_count;
-  this.codon_count = stats.codon_count;
   this.Genome = stats.Genome;
+  stats.Scaffolds = stats.Genome;
   this.Genes = stats.Genes;
   this.Transcripts = stats.Transcripts;
   this.CDS = stats.CDS;
   this.Exons = stats.Exons;
+  base_count = stats.Scaffolds.base_count;
+  codon_count = stats.codon_count;
+  this.base_count = base_count;
+  this.codon_count = codon_count;
   this.n_bases = sum(base_count);
   this.n_codons = sum(codon_count);
 
@@ -201,7 +204,6 @@ Codon_usage.prototype.set_exp_frequency = function(){
   for (var i = 0; i < this.nt.length; i++){
     var tmp = this.freq[this.nt[i].first]/100 * this.freq[this.nt[i].second]/100 * this.freq[this.nt[i].third]/100;
     tmp *= 100;
-    console.log(tmp)
     total_exp_freq += tmp;
     aa_exp_freqs[this.nt[i].aa] = aa_exp_freqs[this.nt[i].aa] ? aa_exp_freqs[this.nt[i].aa] + tmp : tmp;
     exp_freq[this.nt[i].codon] = tmp;
@@ -301,24 +303,37 @@ Object.keys(letters).forEach(function(key){
   aa_order.push({aa:key,letter:letters[key]});
 })
 this.aa_order = aa_order;
-var x = d3.scale.ordinal()
+var y = d3.scale.ordinal()
     .domain(aa_order.map(function(d){return d.letter}))
     .rangePoints([20, 680]);
-this.aaScale = x;
-var xAxis = d3.svg.axis()
-    .scale(x)
+this.aaScale = y;
+var yAxis = d3.svg.axis()
+    .scale(y)
     .orient("left");
 
 amino_plot_group.append("g")
-    .attr("class", "x axis")
-    .call(xAxis);
+    .attr("class", "y axis")
+    .call(yAxis);
 
 
 var feature_plot_group = svg.append('g');
-feature_plot_group.attr('transform','translate(0,0)');
+feature_plot_group.attr('transform','translate(0,260)');
 this.feature_plot_group = feature_plot_group;
+this.feature_plot_type = 'Genome';
 
-feature_plot_group.append('rect').attr('height',290).attr('width',700)
+//feature_plot_group.append('rect').attr('height',290).attr('width',700)
+var x = d3.scale.ordinal()
+    .domain([0].concat(this[this.feature_plot_type].bins))
+    .rangePoints([20, 680]);
+this.binScale = x;
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+this.xAxis = xAxis;
+feature_plot_group.append("g")
+    .attr("class", "x axis")
+    .call(xAxis);
+
 
 var control_group = svg.append('g');
 control_group.attr('transform','translate(710,10)');
@@ -328,77 +343,86 @@ var table = control_group.append('g')
 var header = table.append('g')
 header.attr('transform','translate(0,20)')
 var a = header.append('g').attr('transform','translate(0,0)')
-a.append('rect')
 a.append('text').text('Feature').attr('class','cu-table cu-table-header')
 var b = header.append('g').attr('transform','translate(150,0)')
-b.append('rect')
 b.append('text').text('Count').attr('class','cu-table cu-table-header')
-var d = header.append('g').attr('transform','translate(250,0)')
-d.append('rect')
-d.append('text').text('GC (%)').attr('class','cu-table cu-table-header')
+var c = header.append('g').attr('transform','translate(250,0)')
+c.append('text').text('GC (%)').attr('class','cu-table cu-table-header')
 
 var row = table.append('g')
 row.attr('transform','translate(0,50)')
+row.append('rect').attr('class','cu-control-rect active').attr('rel','Genome')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('rect')
 a.append('text').text('Genome').attr('class','cu-table')
 var b = row.append('g').attr('transform','translate(150,0)')
-b.append('rect')
-b.append('text').text('').attr('class','cu-table')
-var d = row.append('g').attr('transform','translate(250,0)')
-d.append('rect')
-d.append('text').text(GC_content(this.Genome.base_count)).attr('class','cu-table')
+b.append('text').text(sum(this.Genome.binned)).attr('class','cu-table')
+var c = row.append('g').attr('transform','translate(250,0)')
+c.append('text').text(GC_content(this.Genome.base_count)).attr('class','cu-table')
 
 var row = table.append('g')
 row.attr('transform','translate(0,80)')
+row.append('rect').attr('class','cu-control-rect').attr('rel','Genes')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('rect')
 a.append('text').text('Gene').attr('class','cu-table')
 var b = row.append('g').attr('transform','translate(150,0)')
-b.append('rect')
 b.append('text').text(sum(this.Genes.binned)).attr('class','cu-table')
-var d = row.append('g').attr('transform','translate(250,0)')
-d.append('rect')
-d.append('text').text(GC_content(this.Genes.base_count)).attr('class','cu-table')
+var c = row.append('g').attr('transform','translate(250,0)')
+c.append('text').text(GC_content(this.Genes.base_count)).attr('class','cu-table')
 
 var row = table.append('g')
 row.attr('transform','translate(0,110)')
+row.append('rect').attr('class','cu-control-rect').attr('rel','Transcripts')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('rect')
 a.append('text').text('Transcripts').attr('class','cu-table')
 var b = row.append('g').attr('transform','translate(150,0)')
-b.append('rect')
 b.append('text').text(sum(this.Transcripts.binned)).attr('class','cu-table')
-var d = row.append('g').attr('transform','translate(250,0)')
-d.append('rect')
-d.append('text').text(GC_content(this.Transcripts.base_count)).attr('class','cu-table')
+var c = row.append('g').attr('transform','translate(250,0)')
+c.append('text').text(GC_content(this.Transcripts.base_count)).attr('class','cu-table')
 
 var row = table.append('g')
 row.attr('transform','translate(0,140)')
+row.append('rect').attr('class','cu-control-rect').attr('rel','CDS')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('rect')
 a.append('text').text('CDS').attr('class','cu-table')
 var b = row.append('g').attr('transform','translate(150,0)')
-b.append('rect')
 b.append('text').text(sum(this.CDS.binned)).attr('class','cu-table')
-var d = row.append('g').attr('transform','translate(250,0)')
-d.append('rect')
-d.append('text').text(GC_content(this.CDS.base_count)).attr('class','cu-table')
+var c = row.append('g').attr('transform','translate(250,0)')
+c.append('text').text(GC_content(this.CDS.base_count)).attr('class','cu-table')
 
 var row = table.append('g')
 row.attr('transform','translate(0,170)')
+row.append('rect').attr('class','cu-control-rect').attr('rel','Exons')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('rect')
 a.append('text').text('Exons').attr('class','cu-table')
 var b = row.append('g').attr('transform','translate(150,0)')
-b.append('rect')
 b.append('text').text(sum(this.Exons.binned)).attr('class','cu-table')
-var d = row.append('g').attr('transform','translate(250,0)')
-d.append('rect')
-d.append('text').text(GC_content(this.Exons.base_count)).attr('class','cu-table')
+var c = row.append('g').attr('transform','translate(250,0)')
+c.append('text').text(GC_content(this.Exons.base_count)).attr('class','cu-table')
+
+var usage = this;
+d3.selectAll('.cu-control-rect').on('click',function(){
+  var rect = d3.select(this);
+  if (!rect.classed('active')){
+    d3.selectAll('.cu-control-rect').classed('active',false);
+    rect.classed('active',true)
+
+    usage.feature_plot_type = rect.attr('rel');
+    var x = d3.scale.ordinal()
+        .domain([0].concat(usage[usage.feature_plot_type].bins))
+        .rangePoints([20, 680]);
+    usage.binScale = x;
+    usage.xAxis.scale(x);
+    usage.base_count = usage[usage.feature_plot_type].base_count
+    usage.n_bases = sum(usage.base_count)
+    usage.set_frequency();
+    usage.set_exp_frequency();
+    usage.plot();
+  }
+})
 
 codon_plot_group.call(this.tip)
 amino_plot_group.call(this.aa_tip)
+feature_plot_group.call(this.feat_tip)
   return this;
 }
 
@@ -406,7 +430,6 @@ Codon_usage.prototype.tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([10, 0])
   .html(function(d) {
-    console.log('trying')
     return '<span class="cu-codon-tip"><strong>'+d.codon+'</strong> (<span style="color:'+d.col+'">'+d.aa+'</span>)<br/>obs: ' + d.freq + '%<br/>exp: ' + d.exp_freq + '%</span>';
   })
 
@@ -414,15 +437,33 @@ Codon_usage.prototype.aa_tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-5, 0])
   .html(function(d) {
-    console.log('trying')
     return '<span class="cu-amino-tip"><strong>'+d.letter+'</strong> (<span style="color:'+d.col+'">'+d.aa+'</span>)<br/>obs: ' + d.freq + '%<br/>exp: ' + d.exp_freq + '%</span>';
+  })
+
+Codon_usage.prototype.feat_tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-5, 0])
+  .html(function(d) {
+    return '<span class="cu-feat-tip"><strong>Count:</strong> ' + d + '</span>';
   })
 
 
 Codon_usage.prototype.plot = function(parent_div){
-  if (!this.parent_div) this.setup_plot(parent_div);
-  if (!this.freq) this.set_frequency();
-  if (!this.exp_freq) this.set_exp_frequency();
+  var freq_group,aa_group,feat_plot_group;
+  if (!this.parent_div){
+    this.setup_plot(parent_div);
+    this.set_frequency();
+    this.set_exp_frequency();
+    freq_group = this.codon_plot_group.append('g').attr('class','codon_plot_group');
+    aa_group = this.amino_plot_group.append('g').attr('class','amino_plot_group');
+    feat_plot_group = this.feature_plot_group.append('g').attr('class','feature_plot_group');
+  }
+  else {
+    freq_group = this.svg.select('.codon_plot_group');
+    aa_group = this.svg.select('.amino_plot_group');
+    feat_plot_group = this.svg.select('.feature_plot_group');
+
+  }
   var observed = this.freq;
   var expected = this.exp_freq;
   var aa_exp_freqs = this.aa_exp_freqs;
@@ -433,8 +474,8 @@ Codon_usage.prototype.plot = function(parent_div){
   var properties = this.properties;
   var usage = this;
   var color = this.color;
-  var freq_group = this.codon_plot_group.append('g');
-  var freqs = freq_group.selectAll('g.label').data(this.nt)
+
+  var freqs = freq_group.selectAll('g').data(this.nt)
   var group = freqs.enter().append('g')
   group.attr('transform',function(d){var x = xScale(d.x); var y = yScale(d.y); return 'translate('+x+','+y+')'})
   group.attr('rel',function(d){ return d.aa})
@@ -449,7 +490,7 @@ Codon_usage.prototype.plot = function(parent_div){
   group.append('circle').attr('class',function(d){return 'cu-exp-freq'})
 
   var obs = freqs.select('.cu-freq');
-  obs.attr('r',function(d){console.log(d.aa); return fScale(observed[d.codon])})
+  obs.attr('r',function(d){ return fScale(observed[d.codon])})
   obs.style('fill',function(d){return color[properties[d.aa]]})
   var exp = freqs.select('.cu-exp-freq');
   exp.attr('r',function(d){return fScale(expected[d.codon])})
@@ -465,23 +506,23 @@ Codon_usage.prototype.plot = function(parent_div){
                                     var aa = d3.select(this).attr('rel');
                                     d3.selectAll('.'+aa).classed('cu-freq-group-active',false)})
 
-  var aa_group = this.amino_plot_group.append('g');
-  var aa_freqs = aa_group.selectAll('g.label').data(aa_order);
+  var aa_freqs = aa_group.selectAll('g').data(aa_order);
   var aa_group = aa_freqs.enter().append('g');
   var aaScale = this.aaScale
   aa_group.attr('transform',function(d){var y = aaScale(d.letter)-15; return 'translate(0,'+y+')'})
   aa_group.attr('rel',function(d){ return d.aa})
   aa_group.attr('class',function(d){ return 'cu-freq-group '+d.aa})
-  var aa_obs = aa_group.append('rect').attr('height',function(d){return 30})
-                      .attr('width',function(d){return 15*observed[d.aa]})
-                      .attr('class','cu-aa-freq')
+  var aa_obs = aa_group.append('rect').attr('class','cu-aa-freq')
   aa_obs.style('fill',function(d){return color[properties[d.aa]]})
-  var aa_exp = aa_group.append('line').attr('x1',function(d){return 15*aa_exp_freqs[d.aa]})
+  var aa_exp = aa_group.append('line').attr('class','cu-aa-exp-freq')
+  aa_exp.style('stroke',function(d){return color['exp_'+properties[d.aa]]})
+  aa_freqs.select('rect.cu-aa-freq').attr('height',function(d){return 30})
+                      .attr('width',function(d){return 15*observed[d.aa]})
+  aa_freqs.select('line.cu-aa-exp-freq').attr('x1',function(d){return 15*aa_exp_freqs[d.aa]})
                          .attr('x2',function(d){return 15*aa_exp_freqs[d.aa]})
                          .attr('y1',function(d){return 0})
                          .attr('y2',function(d){return 30})
-                      .attr('class','cu-aa-exp-freq')
-  aa_exp.style('stroke',function(d){return color['exp_'+properties[d.aa]]})
+
   //aa_group.append('circle').attr('class',function(d){return 'cu-freq'})
   aa_group.on('mouseenter',function(d){d.freq = usage.freq[d.aa].toFixed(2)
                                     d.exp_freq = usage.aa_exp_freqs[d.aa].toFixed(2)
@@ -492,6 +533,28 @@ Codon_usage.prototype.plot = function(parent_div){
   aa_group.on('mouseleave',function(d){ usage.aa_tip.hide(d);
                                     var aa = d3.select(this).attr('rel');
                                     d3.selectAll('.'+aa).classed('cu-freq-group-active',false)})
+
+  var binned_freqs = this[this.feature_plot_type].binned;
+  var total = sum(binned_freqs)
+  binned_freqs = binned_freqs.map(function(val){return val/total*100*2.5})
+  var binScale = this.binScale;
+  var freq_bins = this[this.feature_plot_type].bins;
+  var bin_width = binScale(freq_bins[1])-binScale(freq_bins[0]);
+  var feat_freqs = feat_plot_group.selectAll('g').data(binned_freqs);
+  var feat_group = feat_freqs.enter().append('g');
+  feat_group.attr('class',function(d,i){ return 'cu-feat-bin-group '+freq_bins[(i+1)]})
+  var feat_bin = feat_group.append('rect')
+
+  feat_freqs.attr('transform',function(d,i){var x = binScale(freq_bins[i])-bin_width; var y = -d; return 'translate('+x+','+y+')'})
+
+  var rect = feat_freqs.select('rect');
+  rect.attr('height',function(d){return d})
+      .attr('width',function(d){return bin_width})
+  feat_freqs.exit().remove();
+
+  feat_freqs.on('mouseenter',function(d){usage.feat_tip.show(d*total/100);})
+  feat_freqs.on('mouseleave',function(d){ usage.feat_tip.hide(d*total/100);})
+
 
   return this;
 }

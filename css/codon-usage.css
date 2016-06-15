@@ -55,15 +55,29 @@ html, body {
     fill: rgba(255,255,255,0.01);
   }
 
+.cu-feat-bin-group {
+  fill: #555555;
+}
 
 .cu-table {
   font: 20px monospace;
   fill: #555555;
+  pointer-events:none;
 }
 
 .cu-table-header {
   font: 20px sans-serif;
   font-weight: bold;
+}
+
+.cu-control-rect {
+  width:320px;
+  height:28px;
+  y:-20px;
+  fill:rgba(125,125,125,0.01);
+}
+.cu-control-rect.active {
+  fill:rgba(125,125,125,0.5);
 }
 
 .d3-tip {
