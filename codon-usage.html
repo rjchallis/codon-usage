@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Codon usage</title>
+<body>
+  <link rel="stylesheet" type="text/css" href="css/codon-usage.css">
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+  <script type="text/javascript" src="js/codon-usage.js"></script>
+
+  <div id="outer" style="width:100%;height:100%">
+  	<div id="chart" style="width:100%;height:100%">
+  	</div>
+  </div>
+
+  <script>
+    var queries = window.location.href.replace(/^.+\?/,'').split('&')
+    var params = [];
+    queries.forEach(function(q){
+    parts = q.split('=')
+    if (!params[parts[0]]) params[parts[0]] = [];
+      params[parts[0]].push(parts[1])
+    })
+    var assemblies = params['assembly'];
+    var usage;
+    d3.json(assemblies[0]+".codon-usage.json", function(error, json) {
+          if (error) return console.warn(error);
+          usage = new Codon_usage (json)
+          usage.plot('chart')
+    })
+  </script>
+
+
+</body>

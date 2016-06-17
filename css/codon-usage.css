@@ -123,6 +123,8 @@ html, body {
 .axis line,
 .axis path {
   fill: none;
-  stroke: #555555;
+  stroke: #999999;
+  stroke-width:1px;
   shape-rendering: crispEdges;
+  vector-effect:non-scaling-stroke;
 }

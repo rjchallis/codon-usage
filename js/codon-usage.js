@@ -109,7 +109,6 @@ this.letter = {
   	Threonine: 'T',
   	Aspargine: 'N',
   	Lysine: 'K',
-  	Valine: 'V',
   	Alanine: 'A',
   	Aspartic_acid: 'D',
   	Glutamic_acid: 'E',
@@ -157,8 +156,7 @@ this.color = {
 	exp_acidic: '#e31a1c'
   };
 
-  this.Genome = stats.Genome;
-  stats.Scaffolds = stats.Genome;
+  this.Scaffolds = stats.Scaffolds;
   this.Genes = stats.Genes;
   this.Transcripts = stats.Transcripts;
   this.CDS = stats.CDS;
@@ -319,7 +317,7 @@ amino_plot_group.append("g")
 var feature_plot_group = svg.append('g');
 feature_plot_group.attr('transform','translate(0,260)');
 this.feature_plot_group = feature_plot_group;
-this.feature_plot_type = 'Genome';
+this.feature_plot_type = 'Scaffolds';
 
 //feature_plot_group.append('rect').attr('height',290).attr('width',700)
 var x = d3.scale.ordinal()
@@ -328,6 +326,7 @@ var x = d3.scale.ordinal()
 this.binScale = x;
 var xAxis = d3.svg.axis()
     .scale(x)
+    .tickFormat(function(d) { d*=1; if (d == 0) return d; return d3.format("s")(d.toPrecision(1)); })
     .orient("bottom");
 this.xAxis = xAxis;
 feature_plot_group.append("g")
@@ -351,21 +350,21 @@ c.append('text').text('GC (%)').attr('class','cu-table cu-table-header')
 
 var row = table.append('g')
 row.attr('transform','translate(0,50)')
-row.append('rect').attr('class','cu-control-rect active').attr('rel','Genome')
+row.append('rect').attr('class','cu-control-rect active').attr('rel','Scaffolds')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('text').text('Genome').attr('class','cu-table')
-var b = row.append('g').attr('transform','translate(150,0)')
-b.append('text').text(sum(this.Genome.binned)).attr('class','cu-table')
+a.append('text').text('Scaffolds').attr('class','cu-table')
+var b = row.append('g').attr('transform','translate(220,0)')
+b.append('text').text(sum(this.Scaffolds.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
-c.append('text').text(GC_content(this.Genome.base_count)).attr('class','cu-table')
+c.append('text').text(GC_content(this.Scaffolds.base_count)).attr('class','cu-table')
 
 var row = table.append('g')
 row.attr('transform','translate(0,80)')
 row.append('rect').attr('class','cu-control-rect').attr('rel','Genes')
 var a = row.append('g').attr('transform','translate(0,0)')
 a.append('text').text('Gene').attr('class','cu-table')
-var b = row.append('g').attr('transform','translate(150,0)')
-b.append('text').text(sum(this.Genes.binned)).attr('class','cu-table')
+var b = row.append('g').attr('transform','translate(220,0)')
+b.append('text').text(sum(this.Genes.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
 c.append('text').text(GC_content(this.Genes.base_count)).attr('class','cu-table')
 
@@ -374,8 +373,8 @@ row.attr('transform','translate(0,110)')
 row.append('rect').attr('class','cu-control-rect').attr('rel','Transcripts')
 var a = row.append('g').attr('transform','translate(0,0)')
 a.append('text').text('Transcripts').attr('class','cu-table')
-var b = row.append('g').attr('transform','translate(150,0)')
-b.append('text').text(sum(this.Transcripts.binned)).attr('class','cu-table')
+var b = row.append('g').attr('transform','translate(220,0)')
+b.append('text').text(sum(this.Transcripts.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
 c.append('text').text(GC_content(this.Transcripts.base_count)).attr('class','cu-table')
 
@@ -384,8 +383,8 @@ row.attr('transform','translate(0,140)')
 row.append('rect').attr('class','cu-control-rect').attr('rel','CDS')
 var a = row.append('g').attr('transform','translate(0,0)')
 a.append('text').text('CDS').attr('class','cu-table')
-var b = row.append('g').attr('transform','translate(150,0)')
-b.append('text').text(sum(this.CDS.binned)).attr('class','cu-table')
+var b = row.append('g').attr('transform','translate(220,0)')
+b.append('text').text(sum(this.CDS.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
 c.append('text').text(GC_content(this.CDS.base_count)).attr('class','cu-table')
 
@@ -394,8 +393,8 @@ row.attr('transform','translate(0,170)')
 row.append('rect').attr('class','cu-control-rect').attr('rel','Exons')
 var a = row.append('g').attr('transform','translate(0,0)')
 a.append('text').text('Exons').attr('class','cu-table')
-var b = row.append('g').attr('transform','translate(150,0)')
-b.append('text').text(sum(this.Exons.binned)).attr('class','cu-table')
+var b = row.append('g').attr('transform','translate(220,0)')
+b.append('text').text(sum(this.Exons.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
 c.append('text').text(GC_content(this.Exons.base_count)).attr('class','cu-table')
 
@@ -412,6 +411,7 @@ d3.selectAll('.cu-control-rect').on('click',function(){
         .rangePoints([20, 680]);
     usage.binScale = x;
     usage.xAxis.scale(x);
+    usage.feature_plot_group.select(".x.axis").call(xAxis);
     usage.base_count = usage[usage.feature_plot_type].base_count
     usage.n_bases = sum(usage.base_count)
     usage.set_frequency();
@@ -444,7 +444,7 @@ Codon_usage.prototype.feat_tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-5, 0])
   .html(function(d) {
-    return '<span class="cu-feat-tip"><strong>Count:</strong> ' + d + '</span>';
+    return '<span class="cu-feat-tip"><strong>Count:</strong> ' + (Math.round(d).toLocaleString()) + '</span>';
   })
 
 
