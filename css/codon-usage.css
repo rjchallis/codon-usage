@@ -46,15 +46,30 @@ html, body {
   }
   .cu-exp-freq {
     stroke: #555555;
-    stroke-width: 2px;
+    stroke-width: 3px;
     fill: rgba(255,255,255,0.01);
+  }
+  .cu-aa-exp-freq {
+    stroke: #555555;
+    stroke-width: 3px;
+    fill: none;
   }
   .cu-mo-rect {
     stroke: none;
     stroke-width: 0px;
     fill: rgba(255,255,255,0.01);
   }
-
+.cu-separator {
+  stroke: #555555;
+  stroke-width: 2px;
+  fill: none;
+}
+.cu-sep-text{
+  stroke: none;
+  fill: #555555;
+  font-family:monospace;
+  font-size: 20px;
+}
 .cu-feat-bin-group {
   fill: #555555;
 }
@@ -79,6 +94,7 @@ html, body {
 .cu-control-rect.active {
   fill:rgba(125,125,125,0.5);
 }
+
 
 .d3-tip {
   pointer-events:none;
@@ -112,6 +128,9 @@ html, body {
   margin: -2px;
   top: 100%;
   left: 0;
+}
+.cu-exp-tip {
+  font-size:75%;
 }
 
 

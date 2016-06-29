@@ -109,6 +109,7 @@ this.letter = {
   	Threonine: 'T',
   	Aspargine: 'N',
   	Lysine: 'K',
+    Valine: 'V',
   	Alanine: 'A',
   	Aspartic_acid: 'D',
   	Glutamic_acid: 'E',
@@ -247,12 +248,12 @@ Codon_usage.prototype.setup_plot = function(parent_div){
   this.yScale = yScale;
   var parent = d3.select('#' + parent_div);
   var svg = parent.append('svg');
-  svg.attr('width', '98%')
-    .attr('height', '98%')
+  svg.attr('width', '100%')
+    .attr('height', '100%')
     .attr('viewBox', '0 0 ' + size + ' ' + size)
     .attr('preserveAspectRatio', 'xMidYMid meet')
   var codon_plot_group = svg.append('g');
-  codon_plot_group.attr('transform','translate(0,300)');
+  codon_plot_group.attr('transform','translate(0,280)');
   this.codon_plot_group = codon_plot_group;
   var bg = codon_plot_group.append('g');
   bg.append('rect')
@@ -290,7 +291,7 @@ Codon_usage.prototype.setup_plot = function(parent_div){
 
 
 var amino_plot_group = svg.append('g');
-amino_plot_group.attr('transform','translate(740,300)');
+amino_plot_group.attr('transform','translate(740,280)');
 this.amino_plot_group = amino_plot_group;
 
 //amino_plot_group.append('rect').attr('height',700).attr('width',290)
@@ -315,14 +316,14 @@ amino_plot_group.append("g")
 
 
 var feature_plot_group = svg.append('g');
-feature_plot_group.attr('transform','translate(0,260)');
+feature_plot_group.attr('transform','translate(0,200)');
 this.feature_plot_group = feature_plot_group;
 this.feature_plot_type = 'Scaffolds';
 
 //feature_plot_group.append('rect').attr('height',290).attr('width',700)
 var x = d3.scale.ordinal()
     .domain([0].concat(this[this.feature_plot_type].bins))
-    .rangePoints([20, 680]);
+    .rangePoints([20, 600]);
 this.binScale = x;
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -333,11 +334,15 @@ feature_plot_group.append("g")
     .attr("class", "x axis")
     .call(xAxis);
 
+var divider_group = svg.append('g');
+divider_group.attr('transform','translate(0,252)');
+divider_group.append('text').text('Feature length distribution').attr('transform','translate(10,-7)').style('text-anchor','start').attr('class','cu-sep-text')
+divider_group.append('rect').attr('height',1).attr('width',980).attr('class','cu-separator')
+divider_group.append('text').text('Codon frequency distribution').attr('transform','translate(970,19)').style('text-anchor','end').attr('class','cu-sep-text')
 
 var control_group = svg.append('g');
-control_group.attr('transform','translate(710,10)');
+control_group.attr('transform','translate(650,20)');
 this.control_group = control_group;
-
 var table = control_group.append('g')
 var header = table.append('g')
 header.attr('transform','translate(0,20)')
@@ -362,7 +367,7 @@ var row = table.append('g')
 row.attr('transform','translate(0,80)')
 row.append('rect').attr('class','cu-control-rect').attr('rel','Genes')
 var a = row.append('g').attr('transform','translate(0,0)')
-a.append('text').text('Gene').attr('class','cu-table')
+a.append('text').text('Genes').attr('class','cu-table')
 var b = row.append('g').attr('transform','translate(220,0)')
 b.append('text').text(sum(this.Genes.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
@@ -397,6 +402,9 @@ var b = row.append('g').attr('transform','translate(220,0)')
 b.append('text').text(sum(this.Exons.binned)).attr('class','cu-table').style('text-anchor','end')
 var c = row.append('g').attr('transform','translate(250,0)')
 c.append('text').text(GC_content(this.Exons.base_count)).attr('class','cu-table')
+d3.selectAll('.cu-control-rect').on('mouseenter',function(d){var rel = d3.select(this).attr('rel'); usage.exp_tip.show(rel);})
+d3.selectAll('.cu-control-rect').on('mouseleave',function(d){ usage.exp_tip.hide();})
+
 
 var usage = this;
 d3.selectAll('.cu-control-rect').on('click',function(){
@@ -408,7 +416,7 @@ d3.selectAll('.cu-control-rect').on('click',function(){
     usage.feature_plot_type = rect.attr('rel');
     var x = d3.scale.ordinal()
         .domain([0].concat(usage[usage.feature_plot_type].bins))
-        .rangePoints([20, 680]);
+        .rangePoints([20, 600]);
     usage.binScale = x;
     usage.xAxis.scale(x);
     usage.feature_plot_group.select(".x.axis").call(xAxis);
@@ -423,6 +431,7 @@ d3.selectAll('.cu-control-rect').on('click',function(){
 codon_plot_group.call(this.tip)
 amino_plot_group.call(this.aa_tip)
 feature_plot_group.call(this.feat_tip)
+control_group.call(this.exp_tip)
   return this;
 }
 
@@ -430,21 +439,28 @@ Codon_usage.prototype.tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([10, 0])
   .html(function(d) {
-    return '<span class="cu-codon-tip"><strong>'+d.codon+'</strong> (<span style="color:'+d.col+'">'+d.aa+'</span>)<br/>obs: ' + d.freq + '%<br/>exp: ' + d.exp_freq + '%</span>';
+    return '<span class="cu-codon-tip"><strong>'+d.codon+'</strong> (<span style="color:'+d.col+'">'+d.aa+'</span>)<br/><span style="color:'+d.col+'">&#9679;</span> obs: ' + d.freq + '%<br/><span style="color:'+d.exp_col+'">&#9675;</span> exp: ' + d.exp_freq + '%</span>';
   })
 
 Codon_usage.prototype.aa_tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-5, 0])
   .html(function(d) {
-    return '<span class="cu-amino-tip"><strong>'+d.letter+'</strong> (<span style="color:'+d.col+'">'+d.aa+'</span>)<br/>obs: ' + d.freq + '%<br/>exp: ' + d.exp_freq + '%</span>';
+    return '<span class="cu-amino-tip"><strong>'+d.letter+'</strong> (<span style="color:'+d.col+'">'+d.aa+'</span>)<br/><span style="color:'+d.col+'">&#9632;</span> obs: ' + d.freq + '%<br/><span style="color:'+d.exp_col+'">|</span> exp: ' + d.exp_freq + '%</span>';
   })
 
 Codon_usage.prototype.feat_tip = d3.tip()
   .attr('class', 'd3-tip')
+  .offset(function(d){var offset = d.pct > 50 ? [10,0] : [-5, 0]; return offset;})
+  .html(function(d) {
+    return '<span class="cu-feat-tip"><strong>Count:</strong> ' + (Math.round(d.raw).toLocaleString()) + '</span>';
+  })
+
+Codon_usage.prototype.exp_tip = d3.tip()
+  .attr('class', 'd3-tip')
   .offset([-5, 0])
   .html(function(d) {
-    return '<span class="cu-feat-tip"><strong>Count:</strong> ' + (Math.round(d).toLocaleString()) + '</span>';
+    return '<span class="cu-exp-tip">set expected codon frequency based on '+d+' GC content</span>';
   })
 
 
@@ -499,6 +515,7 @@ Codon_usage.prototype.plot = function(parent_div){
   group.on('mouseenter',function(d){d.freq = usage.freq[d.codon].toFixed(2)
                                     d.exp_freq = usage.exp_freq[d.codon].toFixed(2)
                                     d.col = color[properties[d.aa]]
+                                    d.exp_col = color['exp_'+properties[d.aa]]
                                     usage.tip.show(d);
                                     var aa = d3.select(this).attr('rel');
                                     d3.selectAll('.'+aa).classed('cu-freq-group-active',true)})
@@ -527,6 +544,7 @@ Codon_usage.prototype.plot = function(parent_div){
   aa_group.on('mouseenter',function(d){d.freq = usage.freq[d.aa].toFixed(2)
                                     d.exp_freq = usage.aa_exp_freqs[d.aa].toFixed(2)
                                     d.col = color[properties[d.aa]]
+                                    d.exp_col = color['exp_'+properties[d.aa]]
                                     usage.aa_tip.show(d);
                                     var aa = d3.select(this).attr('rel');
                                     d3.selectAll('.'+aa).classed('cu-freq-group-active',true)})
@@ -536,11 +554,11 @@ Codon_usage.prototype.plot = function(parent_div){
 
   var binned_freqs = this[this.feature_plot_type].binned;
   var total = sum(binned_freqs)
-  binned_freqs = binned_freqs.map(function(val){return val/total*100*2.5})
+  var bin_heights = binned_freqs.map(function(val){return val/total*100*2.5})
   var binScale = this.binScale;
   var freq_bins = this[this.feature_plot_type].bins;
   var bin_width = binScale(freq_bins[1])-binScale(freq_bins[0]);
-  var feat_freqs = feat_plot_group.selectAll('g').data(binned_freqs);
+  var feat_freqs = feat_plot_group.selectAll('g').data(bin_heights);
   var feat_group = feat_freqs.enter().append('g');
   feat_group.attr('class',function(d,i){ return 'cu-feat-bin-group '+freq_bins[(i+1)]})
   var feat_bin = feat_group.append('rect')
@@ -552,8 +570,8 @@ Codon_usage.prototype.plot = function(parent_div){
       .attr('width',function(d){return bin_width})
   feat_freqs.exit().remove();
 
-  feat_freqs.on('mouseenter',function(d){usage.feat_tip.show(d*total/100);})
-  feat_freqs.on('mouseleave',function(d){ usage.feat_tip.hide(d*total/100);})
+  feat_freqs.on('mouseenter',function(d,i){var val = {}; val.raw = binned_freqs[i]; val.pct = d/2.5; usage.feat_tip.show(val);})
+  feat_freqs.on('mouseleave',function(d,i){ usage.feat_tip.hide();})
 
 
   return this;
