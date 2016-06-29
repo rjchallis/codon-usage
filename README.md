@@ -1,4 +1,5 @@
-# codon_usage
-generate codon usage plots using Javascript and D3
+# codon-usage
 
-for the lepbase website
+Generate interactive codon usage plots as used at [ensembl.lepbase.org](http://ensembl.lepbase.org).  The input file format can be generated from an [Ensembl](http://ensembl.org) database using the ``export_json.pl`` script from the [easy-import](http://easy-import.readme.io) pipeline.
+
+[live demo](http://content.lepbase.org/pages/annotations/codon-usage.html?assembly=Heliconius_melpomene_Hmel2)
