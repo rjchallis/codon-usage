@@ -337,8 +337,10 @@ feature_plot_group.append("g")
 var divider_group = svg.append('g');
 divider_group.attr('transform','translate(0,252)');
 divider_group.append('text').text('Feature length distribution').attr('transform','translate(10,-7)').style('text-anchor','start').attr('class','cu-sep-text')
+//divider_group.append('rect').attr('height',230).attr('width',1).attr('transform','translate(0,-230)').attr('class','cu-separator')
 divider_group.append('rect').attr('height',1).attr('width',980).attr('class','cu-separator')
-divider_group.append('text').text('Codon frequency distribution').attr('transform','translate(970,19)').style('text-anchor','end').attr('class','cu-sep-text')
+//divider_group.append('rect').attr('height',710).attr('width',1).attr('transform','translate(980,0)').attr('class','cu-separator')
+divider_group.append('text').text('Observed ● and expected ○ codon frequencies').attr('transform','translate(970,19)').style('text-anchor','end').attr('class','cu-sep-text')
 
 var control_group = svg.append('g');
 control_group.attr('transform','translate(650,20)');
