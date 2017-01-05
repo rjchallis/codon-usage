@@ -21,8 +21,9 @@
       params[parts[0]].push(parts[1])
     })
     var assemblies = params['assembly'];
+    var path = params['path'] || "json/";
     var usage;
-    d3.json(assemblies[0]+".codon-usage.json", function(error, json) {
+    d3.json(path+assemblies[0]+".codon-usage.json", function(error, json) {
           if (error) return console.warn(error);
           usage = new Codon_usage (json)
           usage.plot('chart')
